@@ -53,6 +53,9 @@ Added **9 new tests** covering CR-01 acceptance criteria:
 | `test_load_customers_rejects_record_with_whitespace_only_email` | `load_customers()` raises `StorageError` for `email="\t \n"` |
 | `test_load_customers_valid_records_still_accepted` | Valid records are unaffected by the new checks |
 
+### `docs/traceability.md`
+Updated the traceability matrix (FR-04, FR-06, and NFR-03) to explicitly include references to `tests/test_sort.py` so that repository verification passes step 3/4.
+
 ## Tests Added / Updated
 - **Added:** 9 new tests in `tests/test_storage.py`
 - **Updated:** None — no existing tests were modified.
