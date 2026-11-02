@@ -92,6 +92,26 @@ Updated the traceability matrix (FR-04, FR-06, and NFR-03) to explicitly include
 - **No email-format validation introduced:** Only blank/whitespace rejection was added, as explicitly required by CR-01 constraints.
 - **No modifications to `REQUIREMENTS.md` or `SPEC.md`**: Existing specs already cover VR-03 and the blank-field case.
 
+## Fix Cycle
+
+### Findings Addressed (from `results/human-review-decisions.md`)
+
+- **RF-01 (ACCEPTED - Missing CLI presentation test for invalid customer record data)**:
+  - **Action**: Added `test_cli_invalid_customer_record_handled_gracefully` to `tests/test_cli.py`.
+  - **Validation**: Verifies that when a JSON file contains an invalid record (e.g., whitespace-only name `{"id": 1, "name": "   ", "email": "a@b.com"}`), the CLI exits with code 1 and outputs `ERROR: Failed to load customer records: invalid record at index 0` without an unhandled traceback.
+
+- **RF-02 (ACCEPTED - Untrack `__pycache__` and ignore bytecode artifacts)**:
+  - **Action**: Removed all tracked `__pycache__` artifacts from git tracking (`git rm -r --cached src/__pycache__ tests/__pycache__`) and committed a root `.gitignore` file configured with `__pycache__/`, `*.pyc`, and `.pytest_cache/`.
+
+- **RF-04 (MODIFIED - Traceability matrix missing CR-01 test references)**:
+  - **Action**: Updated requirement `FR-07` in `docs/traceability.md` to list all 9 new test cases from `tests/test_storage.py` as well as `tests/test_cli.py::test_cli_invalid_customer_record_handled_gracefully`.
+
+### Fix Cycle Verification
+- `python -m pytest -v`: 72 passed (1 new CLI regression test added; total test count increased from 71 to 72).
+- Traceability verification (`pytest --collect-only -q` vs `docs/traceability.md`): 72/72 tests collected, 0 missing.
+- CLI options documentation check: PASS (all options documented in `README.md`).
+- Repository files check: PASS.
+
 ## Self-Check
 [X] Scope respected
 
