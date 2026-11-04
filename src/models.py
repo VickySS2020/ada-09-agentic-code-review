@@ -15,8 +15,12 @@ class Customer:
             raise ValueError("Customer 'id' must be an integer")
         if not isinstance(self.name, str):
             raise ValueError("Customer 'name' must be a string")
+        if not self.name.strip():
+            raise ValueError("Customer 'name' must not be empty or whitespace-only")
         if not isinstance(self.email, str):
             raise ValueError("Customer 'email' must be a string")
+        if not self.email.strip():
+            raise ValueError("Customer 'email' must not be empty or whitespace-only")
 
     def to_dict(self) -> dict[str, Any]:
         """Convert Customer instance to dictionary."""

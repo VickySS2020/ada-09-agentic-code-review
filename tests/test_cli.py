@@ -98,6 +98,19 @@ def test_cli_storage_error_handled_gracefully(capsys):
     assert "ERROR: Failed to load customer records" in captured.out
 
 
+def test_cli_invalid_customer_record_handled_gracefully(tmp_path: Path, capsys):
+    """Verify invalid customer record data outputs clear error message without traceback (CR-01, VR-03, EH-04)."""
+    bad_file = tmp_path / "invalid_record.json"
+    bad_file.write_text(
+        json.dumps([{"id": 1, "name": "   ", "email": "a@b.com"}]),
+        encoding="utf-8",
+    )
+    exit_code = main(["--file", str(bad_file), "--name", "Alice"])
+    captured = capsys.readouterr()
+    assert exit_code == 1
+    assert "ERROR: Failed to load customer records: invalid record at index 0" in captured.out
+
+
 def test_format_table_empty_list():
     """Verify format_table returns empty string for empty input."""
     assert format_table([]) == ""

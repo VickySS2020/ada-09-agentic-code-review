@@ -117,3 +117,87 @@ def test_load_customers_record_invalid_field_type(tmp_path: Path):
         load_customers(str(invalid_file))
     assert "Failed to load customer records" in str(exc_info.value)
     assert "must be an integer" in str(exc_info.value)
+
+
+# ============================================================================
+# CR-01: Empty / whitespace-only name and email validation (FR-07, VR-03, AC-07)
+# ============================================================================
+
+def test_customer_model_rejects_empty_name():
+    """Verify Customer raises ValueError for an empty name (CR-01, VR-03)."""
+    with pytest.raises(ValueError, match="name.*empty"):
+        Customer(id=1, name="", email="a@b.com")
+
+
+def test_customer_model_rejects_whitespace_only_name():
+    """Verify Customer raises ValueError for a whitespace-only name (CR-01, VR-03)."""
+    with pytest.raises(ValueError, match="name.*empty"):
+        Customer(id=1, name="   ", email="a@b.com")
+
+
+def test_customer_model_rejects_empty_email():
+    """Verify Customer raises ValueError for an empty email (CR-01, VR-03)."""
+    with pytest.raises(ValueError, match="email.*empty"):
+        Customer(id=1, name="Alice", email="")
+
+
+def test_customer_model_rejects_whitespace_only_email():
+    """Verify Customer raises ValueError for a whitespace-only email (CR-01, VR-03)."""
+    with pytest.raises(ValueError, match="email.*empty"):
+        Customer(id=1, name="Alice", email="\t  \n")
+
+
+def test_load_customers_rejects_record_with_empty_name(tmp_path: Path):
+    """Verify load_customers raises StorageError when a record has an empty name (CR-01, VR-03, EH-04)."""
+    bad_file = tmp_path / "empty_name.json"
+    bad_file.write_text(json.dumps([{"id": 1, "name": "", "email": "a@b.com"}]), encoding="utf-8")
+
+    with pytest.raises(StorageError) as exc_info:
+        load_customers(str(bad_file))
+    assert "Failed to load customer records" in str(exc_info.value)
+    assert "empty" in str(exc_info.value)
+
+
+def test_load_customers_rejects_record_with_whitespace_only_name(tmp_path: Path):
+    """Verify load_customers raises StorageError when a record has a whitespace-only name (CR-01, VR-03, EH-04)."""
+    bad_file = tmp_path / "ws_name.json"
+    bad_file.write_text(json.dumps([{"id": 2, "name": "   ", "email": "b@b.com"}]), encoding="utf-8")
+
+    with pytest.raises(StorageError) as exc_info:
+        load_customers(str(bad_file))
+    assert "Failed to load customer records" in str(exc_info.value)
+    assert "empty" in str(exc_info.value)
+
+
+def test_load_customers_rejects_record_with_empty_email(tmp_path: Path):
+    """Verify load_customers raises StorageError when a record has an empty email (CR-01, VR-03, EH-04)."""
+    bad_file = tmp_path / "empty_email.json"
+    bad_file.write_text(json.dumps([{"id": 3, "name": "Bob", "email": ""}]), encoding="utf-8")
+
+    with pytest.raises(StorageError) as exc_info:
+        load_customers(str(bad_file))
+    assert "Failed to load customer records" in str(exc_info.value)
+    assert "empty" in str(exc_info.value)
+
+
+def test_load_customers_rejects_record_with_whitespace_only_email(tmp_path: Path):
+    """Verify load_customers raises StorageError when a record has a whitespace-only email (CR-01, VR-03, EH-04)."""
+    bad_file = tmp_path / "ws_email.json"
+    bad_file.write_text(json.dumps([{"id": 4, "name": "Carol", "email": "\t \n"}]), encoding="utf-8")
+
+    with pytest.raises(StorageError) as exc_info:
+        load_customers(str(bad_file))
+    assert "Failed to load customer records" in str(exc_info.value)
+    assert "empty" in str(exc_info.value)
+
+
+def test_load_customers_valid_records_still_accepted(tmp_path: Path):
+    """Verify load_customers still accepts well-formed records after blank-field validation (CR-01)."""
+    good_file = tmp_path / "good.json"
+    good_file.write_text(
+        json.dumps([{"id": 1, "name": "Alice Smith", "email": "alice@example.com"}]),
+        encoding="utf-8",
+    )
+    customers = load_customers(str(good_file))
+    assert len(customers) == 1
+    assert customers[0]["name"] == "Alice Smith"
